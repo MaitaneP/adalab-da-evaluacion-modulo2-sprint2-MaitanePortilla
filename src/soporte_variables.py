@@ -18,6 +18,16 @@ tabla_paises = '''CREATE TABLE IF NOT EXISTS `bd_universidades`.`paises` (
                     `idestado` INT NOT NULL AUTO_INCREMENT,
                     `nombre_pais` VARCHAR(45) NOT NULL,
                     `nombre_provincia` VARCHAR(45) NOT NULL,
+                    `latitud` DECIMAL NOT NULL,
+                    `longitud` DECIMAL NOT NULL,
+                    PRIMARY KEY (`idestado`))
+                    ENGINE = InnoDB;
+                '''
+
+tabla_paises2 = '''CREATE TABLE IF NOT EXISTS `bd_universidades`.`paises` (
+                    `idestado` INT NOT NULL AUTO_INCREMENT,
+                    `nombre_pais` VARCHAR(45) NOT NULL,
+                    `nombre_provincia` VARCHAR(45) NOT NULL,
                     `latitud` DECIMAL(15,10),
                     `longitud` DECIMAL(15,10),
                     PRIMARY KEY (`idestado`))
