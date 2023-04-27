@@ -31,7 +31,8 @@ def extraccion_json(pais):
 def extraccion_api_df(pais, df_origen):
     """Esta función realiza la extracción de los datos de la API de "Universities Hipolabs". Realiza la extracción de los datos en formato .json, mostrando tanto el código
     de estado como la razón del mismo. A continuación printea el nº de diccionarios incluidos en la lista resultado y sus keys. Luego crea un dataframe con esos datos, printea 
-    su número de filas y columnas y finalemnte concatena ese dataframe con el dataframe original introducido como argunmento.
+    su número de filas y columnas y finalemnte concatena ese dataframe con el dataframe original introducido como argunmento. Guarda el resultado en ,csv y .pkl. Guarda el 
+    resultado en .csv y .pkl.
     Parámetros:
         - pais (str): país del que queremos extraer los datos
         - df_origen (pandas.core.frame.DataFrame)
@@ -47,12 +48,13 @@ def extraccion_api_df(pais, df_origen):
     df_pais = pd.DataFrame(resultado)
     print(f'Añadimos al dataframe resultado las {df_pais.shape[0]} filas y {df_pais.shape[1]} columnas de {pais}')
     df_origen = pd.concat([df_origen, df_pais], axis=0, ignore_index=True)
+    df_origen.to_csv('../datos/universidades_arg-can_usa_funciones.csv')
+    df_origen.to_pickle('../datos/universidades_arg-can_usa_funciones.pkl')
     return df_origen
 
 
 
-# EDA
-# Exploración numérica del dataframe
+# EDA. ANÁLISIS EXPLORATORIO DE DATOS
 def explorar_df(dataframe, nombre = ''):
     """Esta función realiza la exploración inicial de un dataframe dado:
             - Muestra las 5 primeras filas
@@ -132,6 +134,7 @@ def limpieza(df):
               los resultados en un dataframe (printeando un mensaje de aviso si no puede obtener los datos de alguna provincia)
             - Une ambos dataframes (el original y el de la latitud y longitud de las provincias) e indica el número de filas y columnas del dataframe resultado, así como su indice para poder comprobar
               que es contínuo
+            - Guarda el resultado en .csv y .pkl.
         Parámetros:
             - df (pandas.core.frame.DataFrame): dataframe que se requiere explorar
         Return: Dataframe limpio y con los datos de latitud y longitud de geopy.
@@ -185,6 +188,8 @@ def limpieza(df):
     df = df.merge(df_geopy, how='left', on='state_province').reset_index(drop=True)
     print(f'Se han inluido la latitud y longitud en el dataframe original. El dataframe completo tiene {df.shape[0]} filas y {df.shape[1]} columnas')
     print(f'A continuación se muestra su indice para comprobar que es contínuo: {df.index}')
+    df.to_csv('../datos/universidades_arg-can_usa_limpio_funciones.csv')
+    df.to_pickle('../datos/universidades_arg-can_usa_limpio_funciones.pkl')
     return df
 
 
@@ -214,8 +219,9 @@ def crear_bbdd(datos_acceso, nombre_bbdd):
         print('SQLSTATE', err.sqlstate)
         print('Message', err.msg)
 
+
 # creación de tablas e inserción de datos
-def crear_insertar_tabla2(datos_acceso, query):
+def crear_insertar_tabla(datos_acceso, query):
     """Esta función crea las tablas e inserta los datos en la base de datos de MySQL Workbench.
             - Printea un mensaje indicando que la conexión se ha realizado con éxito
             - Comprueba si la BBDD existe antes de crearla
@@ -236,3 +242,22 @@ def crear_insertar_tabla2(datos_acceso, query):
         print('Error Code:', err.errno)
         print('SQLSTATE', err.sqlstate)
         print('Message', err.msg)
+
+# función para chquear si ya tenemos ese pais en la tabla de paises
+def check_paises(datos_acceso):
+    cnx = mysql.connector.connect(**datos_acceso)
+    mycursor = cnx.cursor()
+    query_existe_pais = 'SELECT DISTINCT nombre_pais FROM paises'
+    mycursor.execute(query_existe_pais)
+    paises = mycursor.fetchall()
+    return paises
+
+
+# función para chquear si ya tenemos la provincia en la tabla de paises
+def check_provincias(datos_acceso):
+    cnx = mysql.connector.connect(**datos_acceso)
+    mycursor = cnx.cursor()
+    query_existe_provincia = 'SELECT DISTINCT nombre_provincia FROM paises'
+    mycursor.execute(query_existe_provincia)
+    provincias = mycursor.fetchall()
+    return provincias
